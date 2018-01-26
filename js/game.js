@@ -6,6 +6,7 @@
   const GFX = 'gfx';
   const INITIAL_MOVESPEED = 4;
   const SQRT_TWO = Math.sqrt(2);
+  const PLAYER_BULLET_SPEED = 6;
 
   const game = new Phaser.Game(GAME_WIDTH, GAME_HEIGHT, Phaser.AUTO, GAME_CONTAINER_ID, {preload, create, update});
   // {
@@ -16,6 +17,7 @@
   
   let player;
   let cursors;
+  let playerBullets;
 
   // core game methods //  
   function preload() {
@@ -27,14 +29,24 @@
   function create() {
     // creates a cursors object that has predefined values //
     cursors = game.input.keyboard.createCursorKeys();
+    // binding fire to phaser spacebar //
+    cursors.fire = game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
+    // calls playerFire function // onUp = on release //
+    cursors.fire.onUp.add(handlePlayerFire);
+
+
+
     // sets the (8th) spaceship at a specific point in display area // 
     player = game.add.sprite(100, 100, GFX, 8);
     // sets default player speed //
     player.moveSpeed = INITIAL_MOVESPEED;
+    // gives player an array of bullets //
+    playerBullets = game.add.group();
   }
 
   function update(){
     handlePlayerMovement();
+    handleBulletAnimations();
   }
 
   // handler functions //
@@ -63,8 +75,16 @@
       case cursors.up.isDown:
         player.y -= player.moveSpeed * movingV;
         break;
-    }
+    } 
   }
 
+  function handlePlayerFire(){
+      playerBullets.add(game.add.sprite(player.x, player.y, GFX, 7));    
+  }
+
+
+  function handleBulletAnimations() {
+     playerBullets.children.forEach( bullet => bullet.y -= PLAYER_BULLET_SPEED );
+  }
   // console.log(Phaser);
 })(window.Phaser);
