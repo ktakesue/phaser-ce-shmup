@@ -4,7 +4,7 @@
   const GAME_HEIGHT = 600;
   const GAME_CONTAINER_ID = 'game';
   const GFX = 'gfx';
-  const INITIAL_MOVESPEED = 4;
+  const PLAYER_MOVESPEED = 4;
   const SQRT_TWO = Math.sqrt(2);
   const PLAYER_BULLET_SPEED = 6;
   const ENEMY_SPAWN_FREQ = 100; // higher is less frequent
@@ -23,6 +23,7 @@
   // }
   
   let player;
+  let player2;
   let cursors;
   let playerBullets;
   let enemies;
@@ -37,6 +38,12 @@
   function create() {
     // creates a cursors object that has predefined values //
     cursors = game.input.keyboard.createCursorKeys();
+    // bound movement keys to WASD //
+    upButton = game.input.keyboard.addKey(Phaser.KeyCode.W);
+    downButton = game.input.keyboard.addKey(Phaser.KeyCode.S);
+    leftButton = game.input.keyboard.addKey(Phaser.KeyCode.A);
+    rightButton = game.input.keyboard.addKey(Phaser.KeyCode.D);
+
     // binding fire to phaser spacebar //
     cursors.fire = game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
     // calls playerFire function // onUp = on release //
@@ -44,8 +51,11 @@
 
     // sets the (8th) spaceship at a specific point in display area // 
     player = game.add.sprite(100, 100, GFX, 8);
+    // add a second player //
+    player2 = game.add.sprite(70, 70, GFX, 1);
     // sets default player speed //
-    player.moveSpeed = INITIAL_MOVESPEED;
+    player.moveSpeed = PLAYER_MOVESPEED;
+    player2.moveSpeed = PLAYER_MOVESPEED;
     // gives player an array of bullets //
     playerBullets = game.add.group();
     // creates a group of enemies //
@@ -89,7 +99,30 @@
       case cursors.up.isDown:
         player.y -= player.moveSpeed * movingV;
         break;
-    } 
+    }
+    // set keys for second player //
+    if (upButton.isDown || downButton.isDown){
+        movingH = 1; // slow down diagonal movement
+    }
+    if (leftButton.isDown || rightButton.isDown){
+        movingV = 1; // slow down diagonal movement
+    }
+    switch(true){
+      case leftButton.isDown:
+        player2.x -= player2.moveSpeed * movingH;
+        break;
+      case rightButton.isDown:
+        player2.x += player2.moveSpeed * movingH;
+        break;
+    }
+    switch(true){
+      case downButton.isDown:
+        player2.y += player2.moveSpeed * movingV;
+        break;
+      case upButton.isDown:
+        player2.y -= player2.moveSpeed * movingV;
+        break;
+    }  
   }
 
   // adds player bullets to display //
@@ -123,7 +156,7 @@
         ) 
       );
 
-    if( enemiesHit.length ){
+    if(enemiesHit.length){
       // clean up bullets that land
       playerBullets.children
         .filter(bullet => bullet.overlap(enemies))
